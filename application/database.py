@@ -27,20 +27,15 @@ class Services(db.Model):
 class Professional(db.Model): 
     proff_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
+    service_id = db.Column(db.Integer, db.ForeignKey('services.service_id'), nullable=True)
+    experience = db.Column(db.Integer,nullable=True)
     desc = db.Column(db.String(500), nullable=False)
     city = db.Column(db.String(150), nullable=False)
     is_occupied = db.Column(db.Boolean, nullable=False) 
 
     services = db.relationship('Services', 
-                             secondary='professional_services_relation',
                              backref='professionals')
     requests = db.relationship('Requests', backref='professional')
-
-class ProfessionalServicesRelation(db.Model):
-    relation_id = db.Column(db.Integer, primary_key=True)
-    proff_id = db.Column(db.Integer, db.ForeignKey('professional.proff_id'), nullable=False)
-    service_id = db.Column(db.Integer, db.ForeignKey('services.service_id'), nullable=False)  
-    experience = db.Column(db.Integer)
 
 class Customers(db.Model):
     cust_id = db.Column(db.Integer, primary_key=True)

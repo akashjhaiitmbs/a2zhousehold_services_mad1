@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from application.config import Config
-from application.database import db, User, Customers, Professional, Requests
+from application.database import db, User, Customers, Professional, Requests, Services
 
 def create_app():
     app = Flask(__name__)
@@ -71,18 +71,18 @@ def login():
         user_exists = db.session.query(User).filter_by(username=username, password=password, is_active=True).first()
     
         if not user_exists:
-            return redirect(url_for(signup))
+            flash("user does not exists",'error')
+            return render_template('login.html')
 
         session['user_id'] = user_exists.user_id
         session['role'] = user_exists.role
         if user_exists.role =="Admin":
             return redirect(url_for('admin_home'))
         if user_exists.role =="Customer":
-            return redirect(url_for(signup))
+            return redirect(url_for('signup'))
         if user_exists.role =="Professional":
-            return redirect(url_for(signup))
+            return redirect(url_for('signup'))
 
-        return redirect(url_for(signup))
     return render_template('login.html')
 
 @app.route('/logout', methods=['POST'])
@@ -93,6 +93,8 @@ def logout():
 #-------------------------Admin routes---------------------------------
 @app.route('/admin', methods=['GET'])
 def admin_home():
+    if 'user_id' not in session or session['role'] != 'Admin':
+        return redirect(url_for('login'))
     users_count = db.session.query(Customers).count()
     professionals_count = db.session.query(Professional).count()
     completed_requests = db.session.query(Requests).filter_by(status='completed').count()
@@ -108,6 +110,8 @@ def admin_home():
 
 @app.route('/admin-users', methods=['GET'])
 def admin_users():
+    if 'user_id' not in session or session['role'] != 'Admin':
+        return redirect(url_for('login'))
     users = User.query.all()
     return render_template('admin-users.html',
                          users =users)
