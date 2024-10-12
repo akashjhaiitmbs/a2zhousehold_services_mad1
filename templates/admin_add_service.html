@@ -43,5 +43,25 @@
             <input type="submit" value="Add Service">
         </form>
     </div>
+
+    <div style="width: 80%; margin: 0 auto; margin-top: 20px;">
+        <div>
+            <h2 style="text-align: center;">Existing Services</h2>
+            <div style="display: flex; font-weight: bold; padding: 10px; background-color: #f0f0f0; border-bottom: 1px solid #ccc;">
+                <div style="flex: 1; text-align: left;">Name</div>
+                <div style="flex: 1; text-align: left;">Desc</div>
+                <div style="flex: 1; text-align: left;">Minimum Price</div>
+                <div style="flex: 1; text-align: left;">Minimum Time</div>
+            </div>
+            {% for service in services %}
+            <div style="display: flex; padding: 10px; border-bottom: 1px solid #ccc;">
+                <div style="flex: 1; text-align: left;">{{ service.name }}</div>
+                <div style="flex: 1; text-align: left;">{{ service.desc[:10] }}</div>
+                <div style="flex: 1; text-align: left;">{{ service.min_price }}</div>
+                <div style="flex: 1; text-align: left;">{{ service.min_time_req }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>    
 </body>
 </html>

@@ -169,7 +169,9 @@ def add_service():
         db.session.commit()
 
         return redirect(url_for('admin_home'))
-    return render_template('admin_add_service.html')
+    
+    services = Services.query.all()
+    return render_template('admin_add_service.html' ,services = services)
 
 if __name__ == '__main__':
     app.run(debug=True,  port=8000)
