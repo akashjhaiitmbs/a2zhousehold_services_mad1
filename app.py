@@ -37,18 +37,20 @@ def signup():
         username= request.form.get("username")
         password= request.form.get("password")
 
+        print(role)
+
         new_user = User(
                 name=name,
                 username=username,
                 role= role,
                 password= password,
-                is_active= True if role=='customer' else False
+                is_active= True if role=='Customer' else False
             )
             
         db.session.add(new_user)
         db.session.flush() 
 
-        if role=='customer':    
+        if role=='Customer':    
             new_customer = Customers(
                     user_id=new_user.user_id,
                     city=city
@@ -58,7 +60,7 @@ def signup():
             
         db.session.commit()
         
-        return redirect(url_for(login))
+        return redirect(url_for('login'))
     
     return render_template('signup.html')
 
@@ -68,6 +70,8 @@ def login():
         username= request.form.get("username")
         password= request.form.get("password")
 
+
+        print(username, password)
         user_exists = db.session.query(User).filter_by(username=username, password=password, is_active=True).first()
     
         if not user_exists:
@@ -76,10 +80,12 @@ def login():
 
         session['user_id'] = user_exists.user_id
         session['role'] = user_exists.role
+
+        
         if user_exists.role =="Admin":
             return redirect(url_for('admin_home'))
         if user_exists.role =="Customer":
-            return redirect(url_for('signup'))
+            return redirect(url_for('customer_dashboard'))
         if user_exists.role =="Professional":
             return redirect(url_for('signup'))
 
@@ -130,7 +136,6 @@ def handle_admin_action(user_id, role):
         return redirect(url_for('admin_users'))
 
     if user.is_active:
-        # Delete user
         if role == 'customer':
             customer = Customers.query.filter_by(user_id=user_id).first()
             if customer:
@@ -141,7 +146,6 @@ def handle_admin_action(user_id, role):
                 db.session.delete(professional)
         db.session.delete(user)
     else:
-        # Approve user
         user.is_active = True
 
     db.session.commit()
@@ -173,5 +177,125 @@ def add_service():
     services = Services.query.all()
     return render_template('admin_add_service.html' ,services = services)
 
+#------------------customer routes---------------------------
+@app.route('/customer/dashboard')
+def customer_dashboard():
+    if 'user_id' not in session or session['role'] != 'Customer':
+        return redirect(url_for('login'))
+    
+    customer = Customers.query.filter_by(user_id=session['user_id']).first()
+    requests = Requests.query.filter_by(cust_id=customer.cust_id).all()
+    
+    return render_template('customer_dashboard.html', requests=requests)
+
+@app.route('/customer/search', methods=['GET', 'POST'])
+def customer_search():
+    if 'user_id' not in session or session['role'] != 'Customer':
+        return redirect(url_for('login'))
+    
+    customer = Customers.query.filter_by(user_id=session['user_id']).first()
+    
+    if request.method == 'POST':
+        search_term = request.form.get('search_term')
+        search_type = request.form.get('search_type')
+        
+        if search_type == 'service':
+            services = Services.query.filter(Services.name.ilike(f'%{search_term}%')).all()
+            professionals = Professional.query.filter(
+                Professional.service_id.in_([s.service_id for s in services]),
+                Professional.city == customer.city
+            ).all()
+        else:  
+            professionals = Professional.query.join(User).filter(
+                User.name.ilike(f'%{search_term}%'),
+                Professional.city == customer.city
+            ).all()
+        
+        return render_template('customer_search.html', professionals=professionals, search_term=search_term)
+    
+    return render_template('customer_search.html')
+
+@app.route('/customer/request_service/<int:prof_id>')
+def request_service(prof_id):
+    if 'user_id' not in session or session['role'] != 'Customer':
+        return redirect(url_for('login'))
+    
+    customer = Customers.query.filter_by(user_id=session['user_id']).first()
+    professional = Professional.query.get(prof_id)
+    
+    if not professional or professional.city != customer.city:
+        flash('Invalid request or professional not available in your city.', 'error')
+        return redirect(url_for('customer_search'))
+    
+    new_request = Requests(
+        cust_id=customer.cust_id,
+        service_id=professional.service_id,
+        proff_id=prof_id,
+        status='initiated'
+    )
+    db.session.add(new_request)
+    db.session.commit()
+    
+    flash('Service request submitted successfully!', 'success')
+    return redirect(url_for('customer_dashboard'))
+
+#----------------Proffessional routes------------------
+@app.route('/professional/dashboard')
+def professional_dashboard():
+    if 'user_id' not in session or session['role'] != 'Professional':
+        return redirect(url_for('login'))
+    
+    professional = Professional.query.filter_by(user_id=session['user_id']).first()
+    requests = Requests.query.filter_by(proff_id=professional.proff_id).all()
+    
+    return render_template('professional_dashboard.html', requests=requests)
+
+@app.route('/professional/update_request/<int:request_id>/<string:action>')
+def update_request(request_id, action):
+    if 'user_id' not in session or session['role'] != 'Professional':
+        return redirect(url_for('login'))
+    
+    request = Requests.query.get(request_id)
+    if not request:
+        flash('Invalid request.', 'error')
+        return redirect(url_for('professional_dashboard'))
+    
+    if action == 'accept':
+        request.status = 'ongoing'
+    elif action == 'reject':
+        request.status = 'rejected'
+    elif action == 'complete':
+        request.status = 'completed'
+    else:
+        flash('Invalid action.', 'error')
+        return redirect(url_for('professional_dashboard'))
+    
+    db.session.commit()
+    flash('Request updated successfully.', 'success')
+    return redirect(url_for('professional_dashboard'))
+
+@app.route('/professional/profile', methods=['GET', 'POST'])
+def professional_profile():
+    if 'user_id' not in session or session['role'] != 'Professional':
+        return redirect(url_for('login'))
+    
+    professional = Professional.query.filter_by(user_id=session['user_id']).first()
+    services = Services.query.all()
+    
+    if request.method == 'POST':
+        service_id = request.form.get('service_id')
+        experience = request.form.get('experience')
+        desc = request.form.get('desc')
+        
+        professional.service_id = service_id
+        professional.experience = experience
+        professional.desc = desc
+        
+        db.session.commit()
+        flash('Profile updated successfully.', 'success')
+        return redirect(url_for('professional_profile'))
+    
+    return render_template('professional_profile.html', professional=professional, services=services)
+    
 if __name__ == '__main__':
     app.run(debug=True,  port=8000)

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search for Services</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px;">
+    <nav style="width: 100%; background-color:gray">
+        <div style="display: flex; justify-content: space-between;">
+            <ul style="list-style: none; display: flex; margin: 0; padding: 0;">
+                <li style="margin-right: 20px;">
+                    <a href="/admin" style=" color: #000; padding: 5px 10px; font-weight: bold;">Home</a>
+                </li>
+                <li style="margin-right: 20px;">
+                    <a href="/admin-users" style=" color: #000; padding: 5px 10px; font-weight: bold;">Users</a>
+                </li>
+                <li style="margin-right: 20px;">
+                    <a href="/admin-add-service" style=" color: #000; padding: 5px 10px; font-weight: bold;">Add service</a>
+                </li>
+            </ul>
+            
+            <form action="/logout" method="POST">
+                <button type="submit" style="border:1px blue solid; cursor: pointer; font-weight: bold;">Logout</button>
+            </form>
+        </div>
+    </nav>
+    <h1 style="color: #333;">Search for Services</h1>
+    <a href="{{ url_for('customer_dashboard') }}" style="display: inline-block; margin-bottom: 20px; padding: 10px; background-color: #4CAF50; color: white; text-decoration: none;">Back to Dashboard</a>
+    
+    <form method="POST" style="margin-bottom: 20px;">
+        <input type="text" name="search_term" placeholder="Enter service or professional name" required style="padding: 5px;">
+        <select name="search_type" style="padding: 5px;">
+            <option value="service">Search by Service</option>
+            <option value="professional">Search by Professional</option>
+        </select>
+        <button type="submit" style="padding: 5px 10px; background-color: #008CBA; color: white; border: none;">Search</button>
+    </form>
+    
+    {% if professionals %}
+    <h2>Search Results</h2>
+    <div style="display: flex; flex-wrap: wrap;">
+        {% for prof in professionals %}
+        <div style="border: 1px solid #ddd; padding: 10px; margin: 10px; width: 200px;">
+            <h3>{{ prof.user.name }}</h3>
+            <p>Service: {{ prof.services.name }}</p>
+            <p>Experience: {{ prof.experience }} years</p>
+            <p>Description: {{ prof.desc }}</p>
+            <a href="{{ url_for('request_service', prof_id=prof.proff_id) }}" style="display: inline-block; padding: 5px 10px; background-color: #4CAF50; color: white; text-decoration: none;">Request Service</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% elif search_term %}
+    <p>No results found for "{{ search_term }}" in your city.</p>
+    {% endif %}
+</body>
+</html>

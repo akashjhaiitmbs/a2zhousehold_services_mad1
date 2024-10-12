@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Dashboard</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px;">
+    <h1 style="color: #333;">Professional Dashboard</h1>
+    <a href="{{ url_for('professional_profile') }}" style="display: inline-block; margin-bottom: 20px; padding: 10px; background-color: #4CAF50; color: white; text-decoration: none;">Update Profile</a>
+    
+    <h2>Your Requests</h2>
+    <div style="display: flex; flex-wrap: wrap;">
+        {% for request in requests %}
+        <div style="border: 1px solid #ddd; padding: 10px; margin: 10px; width: 250px;">
+            <h3>{{ request.services.name }}</h3>
+            <p>Customer: {{ request.customers.user.name }}</p>
+            <p>Status: {{ request.status }}</p>
+            <p>Date Requested: {{ request.requested_time.strftime('%Y-%m-%d') }}</p>
+            {% if request.status == 'initiated' %}
+                <a href="{{ url_for('update_request', request_id=request.request_id, action='accept') }}" style="display: inline-block; padding: 5px 10px; background-color: #4CAF50; color: white; text-decoration: none; margin-right: 5px;">Accept</a>
+                <a href="{{ url_for('update_request', request_id=request.request_id, action='reject') }}" style="display: inline-block; padding: 5px 10px; background-color: #f44336; color: white; text-decoration: none;">Reject</a>
+            {% elif request.status == 'ongoing' %}
+                <a href="{{ url_for('update_request', request_id=request.request_id, action='complete') }}" style="display: inline-block; padding: 5px 10px; background-color: #008CBA; color: white; text-decoration: none;">Mark as Complete</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

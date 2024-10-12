@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px;">
+    <nav style="width: 100%; background-color:gray">
+        <div style="display: flex; justify-content: space-between;">
+            <ul style="list-style: none; display: flex; margin: 0; padding: 0;">
+                <li style="margin-right: 20px;">
+                    <a href="/admin" style=" color: #000; padding: 5px 10px; font-weight: bold;">Home</a>
+                </li>
+                <li style="margin-right: 20px;">
+                    <a href="/admin-users" style=" color: #000; padding: 5px 10px; font-weight: bold;">Users</a>
+                </li>
+                <li style="margin-right: 20px;">
+                    <a href="/admin-add-service" style=" color: #000; padding: 5px 10px; font-weight: bold;">Add service</a>
+                </li>
+            </ul>
+            
+            <form action="/logout" method="POST">
+                <button type="submit" style="border:1px blue solid; cursor: pointer; font-weight: bold;">Logout</button>
+            </form>
+        </div>
+    </nav>
+    <h1 style="color: #333;">Customer Dashboard</h1>
+    <a href="{{ url_for('customer_search') }}" style="display: inline-block; margin-bottom: 20px; padding: 10px; background-color: #4CAF50; color: white; text-decoration: none;">Search for Services</a>
+    
+
+    <h2>Your Requests</h2>
+    <div style="display: flex; flex-wrap: wrap;">
+        {% for request in requests %}
+        <div style="border: 1px solid #ddd; padding: 10px; margin: 10px; width: 200px;">
+            <h3>{{ request.services.name }}</h3>
+            <p>Status: {{ request.status }}</p>
+            <p>Date Requested: {{ request.requested_time.strftime('%Y-%m-%d') }}</p>
+            <p>Price: ${{ request.services.min_price }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
