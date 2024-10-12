@@ -112,9 +112,40 @@ def admin_home():
 def admin_users():
     if 'user_id' not in session or session['role'] != 'Admin':
         return redirect(url_for('login'))
-    users = User.query.all()
+
+    customers = db.session.query(Customers).join(User).all()
+    professionals = db.session.query(Professional).join(User).outerjoin(Services).all()
+
     return render_template('admin-users.html',
-                         users =users)
+                           customers=customers,
+                           professionals=professionals)
+
+@app.route('/handle-admin-action/<int:user_id>/<string:role>', methods=['POST'])
+def handle_admin_action(user_id, role):
+    if 'user_id' not in session or session['role'] != 'Admin':
+        return redirect(url_for('login'))
+
+    user = User.query.get(user_id)
+    if not user:
+        return redirect(url_for('admin_users'))
+
+    if user.is_active:
+        # Delete user
+        if role == 'customer':
+            customer = Customers.query.filter_by(user_id=user_id).first()
+            if customer:
+                db.session.delete(customer)
+        elif role == 'professional':
+            professional = Professional.query.filter_by(user_id=user_id).first()
+            if professional:
+                db.session.delete(professional)
+        db.session.delete(user)
+    else:
+        # Approve user
+        user.is_active = True
+
+    db.session.commit()
+    return redirect(url_for('admin_users'))
 
 @app.route('/admin-add-service', methods=['GET', 'POST'])
 def add_service():
@@ -139,18 +170,6 @@ def add_service():
 
         return redirect(url_for('admin_home'))
     return render_template('admin_add_service.html')
-
-@app.route('/handle_admin_action/<int:user_id>', methods=['POST'])
-def handle_admin_action(user_id):
-    user = User.query.filter(user_id=user_id)
-
-    if user.is_active:
-        db.session.delete(user)
-    else:
-        user.is_active= True
-    db.session.commit()
-
-    return redirect(url_for('admin_users'))
 
 if __name__ == '__main__':
     app.run(debug=True,  port=8000)

@@ -1,8 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .user-list {
+            margin-bottom: 2rem;
+        }
+        .user-list h2 {
+            margin-bottom: 1rem;
+        }
+        .table-header {
+            font-weight: bold;
+            background-color: #f2f2f2;
+        }
+        .table-row {
+            border-bottom: 1px solid #ccc;
+        }
+        .table-cell {
+            padding: 0.5rem;
+        }
+    </style>
 </head>
 <body>
     <nav style="width: 100%; background-color:gray">
@@ -24,30 +44,65 @@
             </form>
         </div>
     </nav>
-    <div style="display: flex; flex-direction: column; width: 100%;">
-        <div style="display: flex; font-weight: bold; padding: 10px; background-color: #f2f2f2; border-bottom: 1px solid #ccc;">
-            <div style="flex: 1;">Name</div>
-            <div style="flex: 1;">Username</div>
-            <div style="flex: 1;">Role</div>
-            <div style="flex: 1;">Action</div>
+
+    <div class="container mt-4">
+        <div class="user-list">
+            <h2>Customers</h2>
+            <div class="table-header row">
+                <div class="col">Name</div>
+                <div class="col">Username</div>
+                <div class="col">Is Active</div>
+                <div class="col">City</div>
+                <div class="col">Action</div>
+            </div>
+            {% for customer in customers %}
+            <div class="table-row row">
+                <div class="table-cell col">{{ customer.user.name }}</div>
+                <div class="table-cell col">{{ customer.user.username }}</div>
+                <div class="table-cell col">{{ 'Yes' if customer.user.is_active else 'No' }}</div>
+                <div class="table-cell col">{{ customer.city }}</div>
+                <div class="table-cell col">
+                    <form action="{{ url_for('handle_admin_action', user_id=customer.user.user_id, role='customer') }}" method="POST">
+                        <button type="submit" class="btn btn-sm {{ 'btn-danger' if customer.user.is_active else 'btn-success' }}">
+                            {{ 'Delete' if customer.user.is_active else 'Approve' }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
         </div>
 
-        {% for user in users %}
-        <div style="display: flex; padding: 10px; border-bottom: 1px solid #ccc;">
-            <div style="flex: 1;">{{ user.name }}</div>
-            <div style="flex: 1;">{{ user.username }}</div>
-            <div style="flex: 1;">{{ user.role }}</div>
-            <div style="flex: 1;">
-                <form action="{{ url_for('handle_admin_action', user_id=user.user_id) }}" method="POST">
-                    <button type="submit" style="padding: 5px 10px; background-color:black ; color: white; border: none; cursor: pointer;">
-                        {{ 'Delete' if user.is_active else 'Accept' }}
-                    </button>
-                </form>
+        <div class="user-list">
+            <h2>Professionals</h2>
+            <div class="table-header row">
+                <div class="col">Name</div>
+                <div class="col">Username</div>
+                <div class="col">Is Active</div>
+                <div class="col">City</div>
+                <div class="col">Service</div>
+                <div class="col">Experience</div>
+                <div class="col">Action</div>
             </div>
+            {% for professional in professionals %}
+            <div class="table-row row">
+                <div class="table-cell col">{{ professional.user.name }}</div>
+                <div class="table-cell col">{{ professional.user.username }}</div>
+                <div class="table-cell col">{{ 'Yes' if professional.user.is_active else 'No' }}</div>
+                <div class="table-cell col">{{ professional.city }}</div>
+                <div class="table-cell col">{{ professional.services.name if professional.services else 'N/A' }}</div>
+                <div class="table-cell col">{{ professional.experience if professional.experience else 'N/A' }}</div>
+                <div class="table-cell col">
+                    <form action="{{ url_for('handle_admin_action', user_id=professional.user.user_id, role='professional') }}" method="POST">
+                        <button type="submit" class="btn btn-sm {{ 'btn-danger' if professional.user.is_active else 'btn-success' }}">
+                            {{ 'Delete' if professional.user.is_active else 'Approve' }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
-    <div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
