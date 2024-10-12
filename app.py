@@ -58,8 +58,6 @@ def signup():
             
         db.session.commit()
         
-        print(new_customer)
-        print(new_user)
         return redirect(url_for(login))
     
     return render_template('signup.html')
@@ -114,6 +112,29 @@ def admin_users():
     return render_template('admin-users.html',
                          users =users)
 
+@app.route('/admin-add-service', methods=['GET', 'POST'])
+def add_service():
+    if 'user_id' not in session or session['role'] != 'Admin':
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        desc = request.form.get('desc')
+        min_price = request.form.get('min_price')
+        min_time_req = request.form.get('min_time_req')
+
+        new_service = Services(
+            name=name,
+            desc=desc,
+            min_price=min_price,
+            min_time_req=min_time_req
+        )
+
+        db.session.add(new_service)
+        db.session.commit()
+
+        return redirect(url_for('admin_home'))
+    return render_template('admin_add_service.html')
 
 @app.route('/handle_admin_action/<int:user_id>', methods=['POST'])
 def handle_admin_action(user_id):
