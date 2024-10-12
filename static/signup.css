@@ -1,0 +1,21 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa;
+}
+.signup-container {
+    width: 100%;
+    min-width: 800px;
+    min-height: 600px;
+    padding: 10px;
+    border-radius: 8px;
+    border: solid 1px black;
+}
+.login-btn {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+}
