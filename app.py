@@ -57,6 +57,14 @@ def signup():
             )
             
             db.session.add(new_customer)
+        
+        if role=='Professional':    
+            new_professional = Professional(
+                    user_id=new_user.user_id,
+                    city=city
+            )
+            
+            db.session.add(new_professional)
             
         db.session.commit()
         
@@ -87,7 +95,7 @@ def login():
         if user_exists.role =="Customer":
             return redirect(url_for('customer_dashboard'))
         if user_exists.role =="Professional":
-            return redirect(url_for('signup'))
+            return redirect(url_for('professional_dashboard'))
 
     return render_template('login.html')
 

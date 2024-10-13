@@ -29,9 +29,9 @@ class Professional(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey('services.service_id'), nullable=True)
     experience = db.Column(db.Integer,nullable=True)
-    desc = db.Column(db.String(500), nullable=False)
+    desc = db.Column(db.String(500), nullable=True)
     city = db.Column(db.String(150), nullable=False)
-    is_occupied = db.Column(db.Boolean, nullable=False) 
+    is_occupied = db.Column(db.Boolean, nullable=False, default=False) 
 
     services = db.relationship('Services', 
                              backref='professionals')
