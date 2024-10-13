@@ -254,14 +254,23 @@ def professional_signup_config():
         service_id = request.form.get('service_id')
         experience = request.form.get('experience')
         desc = request.form.get('desc')
+        file_path=''
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+
+        doc_url = file_path
 
         new_professional = Professional(
                     user_id=user_id,
                     city=city,
                     service_id=service_id,
                     experience = experience,
-                    desc = desc
-            )
+                    desc = desc,
+                    doc_url= doc_url
+            ) 
         
         db.session.add(new_professional)
         db.session.commit()

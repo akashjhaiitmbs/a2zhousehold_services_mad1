@@ -31,6 +31,7 @@ class Professional(db.Model):
     experience = db.Column(db.Integer,nullable=True)
     desc = db.Column(db.String(500), nullable=True)
     city = db.Column(db.String(150), nullable=False)
+    docs_url = db.Column(db.String(1000), nullable=True)
     is_occupied = db.Column(db.Boolean, default=False) 
 
     services = db.relationship('Services', 
