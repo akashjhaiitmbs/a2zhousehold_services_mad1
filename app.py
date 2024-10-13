@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash, send_from_directory, abort
 from flask_sqlalchemy import SQLAlchemy
 from application.config import Config
 from application.database import db, User, Customers, Professional, Requests, Services
+import os
 
 def create_app():
     app = Flask(__name__)
@@ -181,6 +182,17 @@ def add_service():
     services = Services.query.all()
     return render_template('admin_add_service.html' ,services = services)
 
+@app.route('/download/<filename>')
+def download_file(filename):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    try:
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+    except FileNotFoundError:
+        abort(404)
+
+
 #------------------customer routes---------------------------
 @app.route('/customer/dashboard')
 def customer_dashboard():
@@ -255,13 +267,19 @@ def professional_signup_config():
         experience = request.form.get('experience')
         desc = request.form.get('desc')
         file_path=''
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file = request.files['doc']
+        upload_folder = app.config['UPLOAD_FOLDER']
+        
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+        
+        if file:
+            filename = file.filename
+            file_path = os.path.join(upload_folder, filename)
             file.save(file_path)
             
 
-        doc_url = file_path
+        docs_url = file.filename
 
         new_professional = Professional(
                     user_id=user_id,
@@ -269,7 +287,7 @@ def professional_signup_config():
                     service_id=service_id,
                     experience = experience,
                     desc = desc,
-                    doc_url= doc_url
+                    docs_url= docs_url
             ) 
         
         db.session.add(new_professional)
