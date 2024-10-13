@@ -137,12 +137,15 @@ def handle_admin_action(user_id, role):
         return redirect(url_for('login'))
 
     user = User.query.get(user_id)
+    print("user",user, role)
     if not user:
         return redirect(url_for('admin_users'))
 
+    print("we are here to delete customer")
     if user.is_active:
         if role == 'Customer':
             customer = Customers.query.filter_by(user_id=user_id).first()
+            requests = Requests.query.filter_by(user_id=user_id).first()
             if customer:
                 db.session.delete(customer)
         elif role == 'Professional':

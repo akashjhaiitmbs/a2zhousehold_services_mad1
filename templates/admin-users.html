@@ -62,7 +62,7 @@
                 <div class="table-cell col">{{ 'Yes' if customer.user.is_active else 'No' }}</div>
                 <div class="table-cell col">{{ customer.city }}</div>
                 <div class="table-cell col">
-                    <form action="{{ url_for('handle_admin_action', user_id=customer.user.user_id, role='customer') }}" method="POST">
+                    <form action="{{ url_for('handle_admin_action', user_id=customer.user.user_id, role='Customer') }}" method="POST">
                         <button type="submit" class="btn btn-sm {{ 'btn-danger' if customer.user.is_active else 'btn-success' }}">
                             {{ 'Delete' if customer.user.is_active else 'Approve' }}
                         </button>
