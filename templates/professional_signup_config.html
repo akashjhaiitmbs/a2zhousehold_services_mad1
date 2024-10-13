@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Profile</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px;">
+    <h1 style="color: #333;">Configure Your Profile</h1>
+    
+    <form method="POST" style="max-width: 400px; margin: 0 auto;">
+        <div style="margin-bottom: 15px;">
+            <label for="service_id" style="display: block; margin-bottom: 5px;">Select Service:</label>
+            <select name="service_id" id="service_id" required style="width: 100%; padding: 5px;">
+                {% for service in services %}
+                <option value="{{ service.service_id }}">
+                    {{ service.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="experience" style="display: block; margin-bottom: 5px;">Experience (years):</label>
+            <input type="number" name="experience" id="experience" required style="width: 100%; padding: 5px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label for="desc" style="display: block; margin-bottom: 5px;">Description:</label>
+            <textarea name="desc" id="desc" required style="width: 100%; padding: 5px; height: 100px;"></textarea>
+        </div>
+        <button type="submit" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Update Profile</button>
+    </form>
+</body>
+</html>

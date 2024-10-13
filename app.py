@@ -59,12 +59,8 @@ def signup():
             db.session.add(new_customer)
         
         if role=='Professional':    
-            new_professional = Professional(
-                    user_id=new_user.user_id,
-                    city=city
-            )
-            
-            db.session.add(new_professional)
+            db.session.commit()
+            return redirect(url_for('professional_signup_config', user_id=new_user.user_id, city=city))
             
         db.session.commit()
         
@@ -144,11 +140,11 @@ def handle_admin_action(user_id, role):
         return redirect(url_for('admin_users'))
 
     if user.is_active:
-        if role == 'customer':
+        if role == 'Customer':
             customer = Customers.query.filter_by(user_id=user_id).first()
             if customer:
                 db.session.delete(customer)
-        elif role == 'professional':
+        elif role == 'Professional':
             professional = Professional.query.filter_by(user_id=user_id).first()
             if professional:
                 db.session.delete(professional)
@@ -248,6 +244,36 @@ def request_service(prof_id):
     return redirect(url_for('customer_dashboard'))
 
 #----------------Proffessional routes------------------
+@app.route('/professional-signup-config', methods=['GET', 'POST'])
+def professional_signup_config():
+    user_id = request.args.get('user_id')
+    city = request.args.get('city')
+    if request.method=='POST':
+        print("received post request")
+        print(request.form.get('service_id'), user_id, city, request.form.get('experience'),  request.form.get('desc'))
+        service_id = request.form.get('service_id')
+        experience = request.form.get('experience')
+        desc = request.form.get('desc')
+
+        new_professional = Professional(
+                    user_id=user_id,
+                    city=city,
+                    service_id=service_id,
+                    experience = experience,
+                    desc = desc
+            )
+        
+        db.session.add(new_professional)
+        db.session.commit()
+
+        return redirect(url_for('login'))
+
+    user_id = request.args.get('user_id')
+    city = request.args.get('city')
+    services = Services.query.all()
+    return render_template('professional_signup_config.html', user_id=user_id, city= city, services=services)
+
+
 @app.route('/professional/dashboard')
 def professional_dashboard():
     if 'user_id' not in session or session['role'] != 'Professional':
