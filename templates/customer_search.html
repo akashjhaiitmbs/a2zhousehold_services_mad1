@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search for Services</title>
+    <style>
+        .star-rating {
+            color: #FFD700;
+        }
+    </style>
 </head>
 <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px;">
     <nav style="width: 100%; background-color:gray">
@@ -42,10 +47,21 @@
     <div style="display: flex; flex-wrap: wrap;">
         {% for prof in professionals %}
         <div style="border: 1px solid #ddd; padding: 10px; margin: 10px; width: 200px;">
-            <h3>{{ prof.user.name }}</h3>
-            <p>Service: {{ prof.services.name }}</p>
+            <h3>{{ prof.name }}</h3>
+            <p>Service: {{ prof.service }}</p>
             <p>Experience: {{ prof.experience }} years</p>
             <p>Description: {{ prof.desc }}</p>
+            <p>
+                Average Rating: 
+                {% if prof.avg_rating %}
+                    <span class="star-rating">
+                        {% for _ in range(prof.avg_rating|int) %}&#9733;{% endfor %}
+                    </span>
+                    {{ "%.1f"|format(prof.avg_rating) }}
+                {% else %}
+                    NA
+                {% endif %}
+            </p>
             <a href="{{ url_for('request_service', prof_id=prof.proff_id) }}" style="display: inline-block; padding: 5px 10px; background-color: #4CAF50; color: white; text-decoration: none;">Request Service</a>
         </div>
         {% endfor %}

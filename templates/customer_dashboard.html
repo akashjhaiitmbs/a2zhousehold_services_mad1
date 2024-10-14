@@ -37,6 +37,15 @@
             <p>Status: {{ request.status }}</p>
             <p>Date Requested: {{ request.requested_time.strftime('%Y-%m-%d') }}</p>
             <p>Price: ${{ request.services.min_price }}</p>
+
+            {% if request.status == 'completed' %}
+            <a href="{{ url_for('rate_service', request_id=request.request_id, proff_id=request.proff_id) }}">
+                <button type="button" style="border:1px blue solid; background-color: #4CAF50; color: white; cursor: pointer; font-weight: bold; padding: 5px 10px; margin-right: 5px;">Rate</button>
+            </a>
+            <a href="{{ url_for('file_complaint', request_id=request.request_id, proff_id=request.proff_id) }}">
+                <button type="button" style="border:1px blue solid; background-color: #f44336; color: white; cursor: pointer; font-weight: bold; padding: 5px 10px;">File Complaint</button>
+            </a>
+            {% endif %}
         </div>
         {% endfor %}
     </div>

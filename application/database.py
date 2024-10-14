@@ -52,3 +52,18 @@ class Requests(db.Model):
     requested_time= db.Column(db.DateTime, default=datetime.datetime.now)
     proff_id = db.Column(db.Integer, db.ForeignKey('professional.proff_id'), default=None)  
     status= db.Column(db.String(150), nullable=False)
+
+    reviews=db.relationship("Reviews", backref="requests", lazy=True)
+
+class Reviews(db.Model):
+    review_id = db.Column(db.Integer, primary_key=True)
+    request_id = db.Column(db.Integer, db.ForeignKey('requests.request_id'), nullable=False)
+    proff_id = db.Column(db.Integer, db.ForeignKey('professional.proff_id'), nullable=False)  
+    rating= db.Column(db.String(150), nullable=False)
+    review= db.Column(db.String(150), nullable=False)
+
+class Complains(db.Model):
+    complain_id= db.Column(db.Integer, primary_key=True)
+    request_id = db.Column(db.Integer, db.ForeignKey('requests.request_id'), nullable=False)
+    proff_id = db.Column(db.Integer, db.ForeignKey('professional.proff_id'), nullable=False)  
+    desc= db.Column(db.String(1000), nullable=False)

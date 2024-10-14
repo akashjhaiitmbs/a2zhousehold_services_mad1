@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash, send_from_directory, abort
 from flask_sqlalchemy import SQLAlchemy
 from application.config import Config
-from application.database import db, User, Customers, Professional, Requests, Services
+from application.database import db, User, Customers, Professional, Requests, Services, Reviews, Complains
 import os
 
 def create_app():
@@ -207,6 +207,9 @@ def customer_dashboard():
     
     return render_template('customer_dashboard.html', requests=requests)
 
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from application.database import db, User, Customers, Professional, Requests, Services, Reviews
+
 @app.route('/customer/search', methods=['GET', 'POST'])
 def customer_search():
     if 'user_id' not in session or session['role'] != 'Customer':
@@ -220,19 +223,50 @@ def customer_search():
         
         if search_type == 'service':
             services = Services.query.filter(Services.name.ilike(f'%{search_term}%')).all()
-            professionals = Professional.query.filter(
+            base_query = Professional.query.filter(
                 Professional.service_id.in_([s.service_id for s in services]),
                 Professional.city == customer.city
-            ).all()
+            )
         else:  
-            professionals = Professional.query.join(User).filter(
+            base_query = Professional.query.join(User).filter(
                 User.name.ilike(f'%{search_term}%'),
                 Professional.city == customer.city
-            ).all()
+            )
         
-        return render_template('customer_search.html', professionals=professionals, search_term=search_term)
+        avg_ratings = db.session.query(
+            Reviews.proff_id,
+            db.func.avg(Reviews.rating.cast(db.Float)).label('avg_rating')
+        ).group_by(Reviews.proff_id).subquery()
+        
+        professionals = base_query.outerjoin(
+            avg_ratings,
+            Professional.proff_id == avg_ratings.c.proff_id
+        ).add_columns(avg_ratings.c.avg_rating)
+    
+        professionals = professionals.join(User).join(Services).add_columns(
+            Professional.proff_id,
+            Professional.experience,
+            Professional.desc,
+            User.name.label('user_name'),
+            Services.name.label('service_name')
+        ).all()
+        
+        professionals_list = []
+        for prof in professionals:
+            prof_dict = {
+                'proff_id': prof.proff_id,
+                'name': prof.user_name,
+                'service': prof.service_name,
+                'experience': prof.experience,
+                'desc': prof.desc,
+                'avg_rating': prof.avg_rating
+            }
+            professionals_list.append(prof_dict)
+        
+        return render_template('customer_search.html', professionals=professionals_list, search_term=search_term)
     
     return render_template('customer_search.html')
+
 
 @app.route('/customer/request_service/<int:prof_id>')
 def request_service(prof_id):
@@ -257,6 +291,43 @@ def request_service(prof_id):
     
     flash('Service request submitted successfully!', 'success')
     return redirect(url_for('customer_dashboard'))
+
+@app.route('/rate_service/<int:request_id>/<int:proff_id>')
+def rate_service(request_id, proff_id):
+    return render_template('rate_service.html', request_id=request_id, proff_id=proff_id)
+
+@app.route('/save_rating/<int:request_id>/<int:proff_id>', methods=['POST'])
+def save_rating(request_id, proff_id):
+    rating = request.form.get('rating')
+    review = request.form.get('review')
+    new_review= Reviews(
+        request_id=request_id,
+        proff_id=proff_id,
+        rating= rating,
+        review= review
+    )
+
+    db.session.add(new_review)
+    db.session.commit()
+    return redirect(url_for('customer_dashboard'))
+
+
+@app.route('/file_complaint/<int:request_id>/<int:proff_id>')
+def file_complaint(request_id, proff_id):
+    return render_template('file_complaint.html', request_id=request_id, proff_id=proff_id)
+
+@app.route('/save_complaint/<int:request_id>/<int:proff_id>', methods=['POST'])
+def save_complaint(request_id, proff_id):
+    complaint = request.form.get('complaint')
+    new_complaint= Complains(
+        request_id=request_id,
+        proff_id=proff_id,
+        desc= complaint
+    )
+    db.session.add(new_complaint)
+    db.session.commit()
+    return redirect(url_for('customer_dashboard'))
+
 
 #----------------Proffessional routes------------------
 @app.route('/professional-signup-config', methods=['GET', 'POST'])
