@@ -112,6 +112,8 @@ def admin_home():
     pending_requests = db.session.query(Requests).filter_by(status='pending').count()
     not_accepted_requests = db.session.query(Requests).filter_by(proff_id=None).count()
 
+    complains= Complains.query.all()
+
     return render_template('admin-dashboard.html',
                          users_count=users_count,
                          professionals_count=professionals_count,

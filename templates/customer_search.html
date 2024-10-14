@@ -4,11 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search for Services</title>
-    <style>
-        .star-rating {
-            color: #FFD700;
-        }
-    </style>
 </head>
 <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px;">
     <nav style="width: 100%; background-color:gray">
@@ -54,9 +49,6 @@
             <p>
                 Average Rating: 
                 {% if prof.avg_rating %}
-                    <span class="star-rating">
-                        {% for _ in range(prof.avg_rating|int) %}&#9733;{% endfor %}
-                    </span>
                     {{ "%.1f"|format(prof.avg_rating) }}
                 {% else %}
                     NA
