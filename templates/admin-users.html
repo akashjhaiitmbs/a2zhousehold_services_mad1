@@ -64,7 +64,7 @@
                 <div class="table-cell col">
                     <form action="{{ url_for('handle_admin_action', user_id=customer.user.user_id, role='Customer') }}" method="POST">
                         <button type="submit" class="btn btn-sm {{ 'btn-danger' if customer.user.is_active else 'btn-success' }}">
-                            {{ 'Delete' if customer.user.is_active else 'Approve' }}
+                            {{ 'Block' if customer.user.is_active else 'Approve' }}
                         </button>
                     </form>
                 </div>
@@ -107,7 +107,7 @@
                 <div class="table-cell col">
                     <form action="{{ url_for('handle_admin_action', user_id=professional.user.user_id, role='professional') }}" method="POST">
                         <button type="submit" class="btn btn-sm {{ 'btn-danger' if professional.user.is_active else 'btn-success' }}">
-                            {{ 'Delete' if professional.user.is_active else 'Approve' }}
+                            {{ 'Block' if professional.user.is_active else 'Approve' }}
                         </button>
                     </form>
                 </div>
